@@ -44,6 +44,7 @@ class LayerFetcher(fetchers.LocalFetcher):
     ENDPOINT = "layers"
     _DEFAULT_BRANCH = None
     BRANCH = _DEFAULT_BRANCH
+    REQUESTS_TIMEOUT = 5
 
     @classmethod
     def set_layer_indexes(cls, layer_indexes):
@@ -126,9 +127,10 @@ class LayerFetcher(fetchers.LocalFetcher):
                             result.update(revision=revision)
                         return result
                     try:
-                        result = requests.get(uri)
-                    except Exception:
+                        result = requests.get(uri, timeout=cls.REQUESTS_TIMEOUT)
+                    except Exception as e:
                         result = None
+                        log.debug('Request to {} failed with {}'.format(uri, e))
                     if result and result.ok:
                         result = result.json()
                         if result.get("repo"):
